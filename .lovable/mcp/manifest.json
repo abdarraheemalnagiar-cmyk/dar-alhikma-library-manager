@@ -1,0 +1,109 @@
+{
+  "version": 1,
+  "sdk_version": "2.0.4",
+  "path": "/mcp",
+  "auth": {
+    "type": "none"
+  },
+  "mcp": {
+    "server": {
+      "name": "dar-al-hikma-elevate",
+      "version": "0.1.0",
+      "title": "Dar Al Hikma Elevate"
+    },
+    "tools": [
+      {
+        "name": "search_books",
+        "title": "Search books",
+        "description": "Search the Dar Al Hikma bookstore catalog by title, author, or category slug. Returns matching books with price in Libyan dinar and availability.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "query": {
+              "description": "Free text matched against book title and author.",
+              "type": "string"
+            },
+            "category": {
+              "description": "Category slug, e.g. 'psychology'.",
+              "type": "string"
+            },
+            "only_in_stock": {
+              "description": "Return only books currently in stock.",
+              "type": "boolean"
+            },
+            "limit": {
+              "description": "Maximum number of books (default 20).",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_book",
+        "title": "Get book details",
+        "description": "Get full details of one Dar Al Hikma book by its slug, including category name and price.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "slug": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Book slug, as returned by search_books."
+            }
+          },
+          "required": [
+            "slug"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_categories",
+        "title": "List categories",
+        "description": "List all book categories in the Dar Al Hikma catalog with their slugs and Arabic names.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_store_info",
+        "title": "Store info and branches",
+        "description": "Get Dar Al Hikma bookstore contact details, opening hours, branch addresses, and frequently asked questions.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
