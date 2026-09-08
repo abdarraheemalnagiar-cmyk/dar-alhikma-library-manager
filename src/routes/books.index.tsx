@@ -18,7 +18,7 @@ import {
 
 type SortKey = "title" | "price-asc" | "price-desc" | "newest";
 
-type BooksSearch = { q: string; cat: string; sort: SortKey; status: string };
+type BooksSearch = { q?: string; cat?: string; sort?: SortKey; status?: string };
 
 export const Route = createFileRoute("/books/")({
   validateSearch: (search: Record<string, unknown>): BooksSearch => ({
@@ -65,7 +65,7 @@ function BooksPage() {
     navigate({ search: (prev) => ({ ...prev, ...patch }), replace: true });
 
   const books = useMemo(() => {
-    const needle = normalizeArabic(search.q);
+    const needle = normalizeArabic(search.q ?? "");
     const terms = needle ? needle.split(" ") : [];
     let list = site.books.filter((book) => {
       if (search.cat && categoryOf(book, site.categories)?.slug !== search.cat) return false;
@@ -106,7 +106,7 @@ function BooksPage() {
         <div className="relative flex-1">
           <Search className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            value={search.q}
+            value={search.q ?? ""}
             onChange={(e) => setSearch({ q: e.target.value })}
             placeholder="ابحث بالعنوان أو المؤلف أو الرقم الدولي"
             className="pr-9"
@@ -114,7 +114,7 @@ function BooksPage() {
           />
         </div>
         <select
-          value={search.status}
+          value={search.status ?? ""}
           onChange={(e) => setSearch({ status: e.target.value })}
           aria-label="الحالة"
           className="h-9 rounded-md border border-input bg-background px-3 text-sm"
@@ -126,7 +126,7 @@ function BooksPage() {
           <option value="unavailable">غير متوفر</option>
         </select>
         <select
-          value={search.sort}
+          value={search.sort ?? "title"}
           onChange={(e) => setSearch({ sort: e.target.value as SortKey })}
           aria-label="الترتيب"
           className="h-9 rounded-md border border-input bg-background px-3 text-sm"
@@ -142,7 +142,7 @@ function BooksPage() {
         <button
           onClick={() => setSearch({ cat: "" })}
           className={`rounded-full border px-3 py-1.5 text-xs transition-colors ${
-            search.cat === "" ? "border-gold text-gold" : "border-border hover:border-gold"
+            !search.cat ? "border-gold text-gold" : "border-border hover:border-gold"
           }`}
         >
           كل الأقسام
@@ -165,7 +165,7 @@ function BooksPage() {
         <div className="surface-panel mt-10 p-10 text-center text-sm text-muted-foreground">
           لا توجد كتب مطابقة لبحثك.
           <div className="mt-3">
-            <Link to="/books" search={{ q: "", cat: "", sort: "title", status: "" }} className="text-gold hover:underline">
+            <Link to="/books" search={{}} className="text-gold hover:underline">
               إعادة ضبط البحث
             </Link>
           </div>

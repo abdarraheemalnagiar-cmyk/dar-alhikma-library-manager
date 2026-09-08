@@ -42,7 +42,7 @@ function Message({ text }: { text: string }) {
     <div className="mx-auto max-w-3xl px-4 py-20 text-center text-muted-foreground">
       {text}
       <div className="mt-4">
-        <Link to="/books" search={{ q: "", cat: "", sort: "title", status: "" }} className="text-gold hover:underline">
+        <Link to="/books" search={{}} className="text-gold hover:underline">
           العودة إلى الكتب
         </Link>
       </div>
@@ -89,7 +89,7 @@ function BookDetail() {
           {category && (
             <Link
               to="/books"
-              search={{ q: "", cat: category.slug, sort: "title", status: "" }}
+              search={{ cat: category.slug }}
               className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-gold"
             >
               <CategoryIcon iconKey={category.icon_key} className="size-3.5" />
