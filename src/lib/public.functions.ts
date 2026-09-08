@@ -6,9 +6,11 @@ export type Category = {
   id: string;
   slug: string;
   name: string;
-  cover_key: string;
+  icon_key: string;
   sort_order: number;
 };
+
+export type BookStatus = "available" | "unavailable" | "new" | "under_print";
 
 export type Book = {
   id: string;
@@ -16,14 +18,15 @@ export type Book = {
   title: string;
   author: string;
   description: string;
-  rating: string;
-  price: number;
+  price: number | null;
+  isbn: string | null;
   cover_url: string | null;
-  in_stock: boolean;
-  is_bestseller: boolean;
-  is_new: boolean;
+  status: string | null;
+  is_featured: boolean;
   sort_order: number;
   category_id: string | null;
+  created_at: string;
+  updated_at: string;
 };
 
 export type Branch = {
@@ -37,14 +40,6 @@ export type Branch = {
   sort_order: number;
 };
 
-export type Testimonial = {
-  id: string;
-  name: string;
-  rating: number;
-  comment: string;
-  sort_order: number;
-};
-
 export type Faq = { id: string; question: string; answer: string; sort_order: number };
 
 export type SiteData = {
@@ -52,7 +47,6 @@ export type SiteData = {
   categories: Category[];
   books: Book[];
   branches: Branch[];
-  testimonials: Testimonial[];
   faqs: Faq[];
 };
 
@@ -75,20 +69,20 @@ export function publicClient() {
 
 export const getSiteData = createServerFn({ method: "GET" }).handler(async (): Promise<SiteData> => {
   const supabase = publicClient();
-  const [settingsRes, categoriesRes, booksRes, branchesRes, testimonialsRes, faqsRes] =
-    await Promise.all([
-      supabase.from("settings").select("key, value"),
-      supabase.from("categories").select("id, slug, name, cover_key, sort_order").order("sort_order"),
-      supabase
-        .from("books")
-        .select(
-          "id, slug, title, author, description, rating, price, cover_url, in_stock, is_bestseller, is_new, sort_order, category_id",
-        )
-        .order("sort_order"),
-      supabase.from("branches").select("*").order("sort_order"),
-      supabase.from("testimonials").select("id, name, rating, comment, sort_order").order("sort_order"),
-      supabase.from("faqs").select("id, question, answer, sort_order").order("sort_order"),
-    ]);
+  const [settingsRes, categoriesRes, booksRes, branchesRes, faqsRes] = await Promise.all([
+    supabase.from("settings").select("key, value"),
+    supabase.from("categories").select("id, slug, name, icon_key, sort_order").order("sort_order"),
+    supabase
+      .from("books")
+      .select(
+        "id, slug, title, author, description, price, isbn, cover_url, status, is_featured, sort_order, category_id, created_at, updated_at",
+      )
+      .eq("is_active", true)
+      .order("sort_order")
+      .limit(2000),
+    supabase.from("branches").select("*").order("sort_order"),
+    supabase.from("faqs").select("id, question, answer, sort_order").eq("is_active", true).order("sort_order"),
+  ]);
 
   const settings: Record<string, string> = {};
   for (const row of settingsRes.data ?? []) settings[row.key] = row.value;
@@ -96,9 +90,11 @@ export const getSiteData = createServerFn({ method: "GET" }).handler(async (): P
   return {
     settings,
     categories: (categoriesRes.data ?? []) as Category[],
-    books: ((booksRes.data ?? []) as Book[]).map((b) => ({ ...b, price: Number(b.price) })),
+    books: ((booksRes.data ?? []) as Book[]).map((b) => ({
+      ...b,
+      price: b.price === null || b.price === undefined ? null : Number(b.price),
+    })),
     branches: (branchesRes.data ?? []) as Branch[],
-    testimonials: (testimonialsRes.data ?? []) as Testimonial[],
     faqs: (faqsRes.data ?? []) as Faq[],
   };
 });
